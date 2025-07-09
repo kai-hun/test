@@ -1,0 +1,10 @@
+<script>
+  const API_KEY = "AIza..."; // 실제 API 키
+  const SHEET_ID = "1eOyqB03QmpaW_b7CFWH6emkeAdOWLx170-Jk7PhcTFM";
+  const RANGE = "카페목록!A1:Z5";
+
+  fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(RANGE)}?key=${API_KEY}`)
+    .then(res => res.json())
+    .then(data => console.log("✅ 테스트 성공", data))
+    .catch(err => console.error("❌ 테스트 실패", err));
+</script>
