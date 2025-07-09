@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>카페 상세 정보</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .details-container { max-width: 800px; margin: 1rem auto; background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; }
+        .details-img { width: 100%; height: 300px; object-fit: cover; }
+        .details-info { padding: 1.5rem; }
+        #map { width: 100%; height: 250px; margin-top: 1.5rem; border-radius: 8px; }
+        .section-title { margin-top: 2rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; }
+        /* 리뷰 섹션 스타일 */
+        #review-form { display: flex; flex-direction: column; gap: 0.7rem; margin-top: 1rem; }
+        .review-inputs { display: flex; gap: 0.5rem; }
+        #review-inputs input, #review-inputs select { padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; }
+        #author-input { width: 120px; }
+        #review-text { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        #review-form button { padding: 0.8rem 1rem; border: none; background-color: #000; color: white; border-radius: 6px; cursor: pointer; align-self: flex-end; }
+        #reviews-list { margin-top: 1rem; }
+        .review-item { border-bottom: 1px solid #eee; padding: 1.5rem 0; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; color: #555; }
+        .review-author { font-weight: bold; }
+        .review-rating { color: #f59e0b; }
+        .review-timestamp { font-size: 0.8rem; }
+        .review-text { margin-top: 0.5rem; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="home-link">처음으로</a>
+        <span id="header-title">카페 정보</span>
+    </header>
+
+    <main id="details-container" class="details-container"></main>
+    
+    <script src="firebase-init.js"></script>
+    <script>
+        let currentCafe = null;
+
+        const saveReview = () => {
+            // ✨ [수정됨] 이름과 별점 입력값 가져오기
+            const authorInput = document.getElementById('author-input');
+            const ratingSelect = document.getElementById('rating-select');
+            const reviewInput = document.getElementById('review-text');
+
+            const authorName = authorInput.value.trim();
+            const starRating = parseInt(ratingSelect.value);
+            const reviewText = reviewInput.value.trim();
+
+            if (!authorName || !reviewText) {
+                alert('이름과 리뷰 내용을 모두 입력해주세요.');
+                return;
+            }
+            
+            // ✨ [수정됨] Firestore에 저장할 데이터 추가
+            db.collection('reviews').add({
+                cafeId: currentCafe.id,
+                author: authorName,
+                rating: starRating,
+                text: reviewText,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                authorInput.value = '';
+                reviewInput.value = '';
+                loadReviews(); // 리뷰 목록 새로고침
+            }).catch(error => {
+                console.error("리뷰 저장 오류: ", error);
+            });
+        };
+        
+        // ✨ [수정됨] 별점, 작성자, 시간을 포함하여 리뷰를 불러오는 함수
+        const loadReviews = () => {
+            const reviewsListDiv = document.getElementById('reviews-list');
+            reviewsListDiv.innerHTML = ''; 
+
+            db.collection('reviews')
+              .where('cafeId', '==', currentCafe.id)
+              .orderBy('createdAt', 'desc')
+              .get()
+              .then(querySnapshot => {
+                  if(querySnapshot.empty){
+                      reviewsListDiv.innerHTML = '<p>아직 작성된 리뷰가 없습니다.</p>';
+                      return;
+                  }
+                  querySnapshot.forEach(doc => {
+                      const review = doc.data();
+                      const reviewElement = document.createElement('div');
+                      reviewElement.className = 'review-item';
+                      
+                      const ratingStars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                      // Firestore의 timestamp는 null일 수 있으므로 확인 후 변환
+                      const timestamp = review.createdAt ? review.createdAt.toDate().toLocaleString() : '시간 정보 없음';
+
+                      reviewElement.innerHTML = `
+                        <div class="review-header">
+                            <div>
+                                <span class="review-author">${review.author}</span>
+                                <span class="review-rating">${ratingStars}</span>
+                            </div>
+                            <span class="review-timestamp">${timestamp}</span>
+                        </div>
+                        <p class="review-text">${review.text}</p>
+                      `;
+                      reviewsListDiv.appendChild(reviewElement);
+                  });
+              });
+        };
+
+        const renderDetails = (cafe) => {
+            currentCafe = cafe; 
+            const container = document.getElementById('details-container');
+            
+            // ✨ [수정됨] 리뷰 입력 폼에 이름, 별점 필드 추가
+            container.innerHTML = `
+                <img src="${cafe.image}" alt="${cafe.name}" class="details-img">
+                <div class="details-info">
+                    <h2>${cafe.name}</h2>
+                    <p><b>특징:</b> ${cafe.features.join(' · ')}</p>
+                    
+                    <h3 class="section-title">리뷰 남기기</h3>
+                    <div id="review-form">
+                        <div class="review-inputs">
+                            <input type="text" id="author-input" placeholder="이름">
+                            <select id="rating-select">
+                                <option value="5">★★★★★</option>
+                                <option value="4">★★★★☆</option>
+                                <option value="3">★★★☆☆</option>
+                                <option value="2">★★☆☆☆</option>
+                                <option value="1">★☆☆☆☆</option>
+                            </select>
+                        </div>
+                        <textarea id="review-text" rows="3" placeholder="리뷰를 남겨주세요"></textarea>
+                        <button onclick="saveReview()">리뷰 등록</button>
+                    </div>
+
+                    <h3 class="section-title">방문자 리뷰</h3>
+                    <div id="reviews-list"></div>
+                </div>
+            `;
+            
+            loadReviews();
+        };
+
+        const cafeId = new URLSearchParams(window.location.search).get('id');
+        fetch('cafes.json')
+            .then(res => res.json())
+            .then(allCafes => {
+                const cafe = allCafes.find(c => c.id === parseInt(cafeId));
+                if (cafe) {
+                    renderDetails(cafe);
+                }
+            });
+    </script>
+</body>
+</html>

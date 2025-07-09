@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>내가 찜한 카페</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="common.css">
+</head>
+<body>
+  <header>
+    <a href="index.html" class="home-link">처음으로</a>
+    내가 찜한 카페
+  </header>
+  
+  <main id="result"></main>
+
+  <script src="favorites.js"></script>
+  <script>
+    let cafeData = [];
+
+    // 찜한 카페 목록을 화면에 표시합니다.
+    const displayFavorites = () => {
+      const resultDiv = document.getElementById('result');
+      const favoriteIds = getFavorites();
+      
+      if (favoriteIds.length === 0) {
+        resultDiv.innerHTML = '<p style="text-align:center; margin-top: 2rem;">찜한 카페가 없습니다.</p>';
+        return;
+      }
+      
+      const favoriteCafes = cafeData.filter(cafe => favoriteIds.includes(cafe.id));
+
+      resultDiv.innerHTML = favoriteCafes.map(cafe => `
+        <div class="cafe">
+          <img src="${cafe.image}" class="cafe-img" alt="${cafe.name}">
+          <div class="cafe-info">
+            <span class="favorite-btn" onclick="handleFavoriteClick(${cafe.id})">⭐</span>
+            <h3>${cafe.name}</h3>
+            <div class="cafe-features">${cafe.features.join(' · ')}</div>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    // 찜하기 버튼 클릭을 처리합니다.
+    const handleFavoriteClick = (cafeId) => {
+      toggleFavorite(cafeId);
+      displayFavorites(); // 목록을 다시 그려서 즉시 반영
+    };
+    
+    // 카페 데이터를 불러온 뒤 즐겨찾기 목록을 표시합니다.
+    fetch('cafes.json')
+      .then(res => res.json())
+      .then(data => {
+        cafeData = data;
+        displayFavorites();
+      });
+  </script>
+</body>
+</html>

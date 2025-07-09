@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>내 주변 카페 찾기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="common.css">
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=11fcf4dea3e35d48d38adb2e633ab706&libraries=services&autoload=false"></script>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="home-link">처음으로</a>
+    내 주변 카페 (거리순)
+  </header>
+  <section>
+    <div id="mapView" style="width:100%;height:40vh;"></div>
+    <div id="result" style="padding-top: 1rem;"></div>
+  </section>
+
+  <script src="favorites.js"></script>
+  <script>
+    let mapInstance;
+    let cafeData = [];
+    let userPosition;
+    let openedInfoWindow = null;
+
+    fetch('cafes.json')
+      .then(res => res.json())
+      .then(data => {
+        cafeData = data.filter(c => c.lat && c.lng);
+        kakao.maps.load(initMap);
+      });
+
+    function initMap() {
+      navigator.geolocation.getCurrentPosition(pos => {
+        userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        renderMap(new kakao.maps.LatLng(userPosition.lat, userPosition.lng));
+        displayCafesByDistance();
+      }, () => {
+        userPosition = { lat: 37.4963, lng: 126.9575 }; // fallback
+        renderMap(new kakao.maps.LatLng(userPosition.lat, userPosition.lng));
+        displayCafesByDistance();
+        alert("위치 정보를 가져올 수 없어 기본 위치로 설정합니다.");
+      });
+    }
+
+    function renderMap(center) {
+      mapInstance = new kakao.maps.Map(document.getElementById("mapView"), { center: center, level: 4 });
+      new kakao.maps.Marker({ map: mapInstance, position: center, title: "내 위치" });
+
+      cafeData.forEach(cafe => {
+        const marker = new kakao.maps.Marker({
+          map: mapInstance,
+          position: new kakao.maps.LatLng(cafe.lat, cafe.lng),
+          title: cafe.name
+        });
+        
+        // ✨ [수정됨] 정보창 내용에 상세 페이지로 가는 링크를 추가했습니다.
+        const content = `
+          <div style="padding:8px;font-size:13px; text-align:center;">
+            <a href="details.html?id=${cafe.id}" style="text-decoration:none;color:black;">
+              <strong>${cafe.name}</strong>
+              <br>
+              <span style="font-size:11px; color:#3686E5">상세정보 보기</span>
+            </a>
+          </div>`;
+        const infowindow = new kakao.maps.InfoWindow({ content: content, removable: true });
+        
+        kakao.maps.event.addListener(marker, 'click', function () {
+            if (openedInfoWindow) {
+                openedInfoWindow.close();
+            }
+            infowindow.open(mapInstance, marker);
+            openedInfoWindow = infowindow;
+        });
+      });
+    }
+    
+    function getDistance(lat1, lng1, lat2, lng2) {
+      function toRad(v) { return v * Math.PI / 180; }
+      const R = 6371e3; // metres
+      const φ1 = toRad(lat1), φ2 = toRad(lat2);
+      const Δφ = toRad(lat2 - lat1), Δλ = toRad(lng2 - lng1);
+      const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2) * Math.sin(Δλ/2)**2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function displayCafesByDistance() {
+      cafeData.forEach(cafe => {
+        cafe.distance = getDistance(userPosition.lat, userPosition.lng, cafe.lat, cafe.lng);
+      });
+      cafeData.sort((a, b) => a.distance - b.distance);
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = cafeData.map(c => `
+        <div class="cafe">
+          <img src="${c.image}" class="cafe-img" alt="${c.name}">
+          <div class="cafe-info">
+             <span class="favorite-btn" id="fav-btn-${c.id}" onclick="handleFavoriteClick(${c.id})">
+              ${isFavorite(c.id) ? '⭐' : '☆'}
+            </span>
+            <h3><a href="details.html?id=${c.id}">${c.name}</a></h3>
+            <div class="cafe-features">거리: ${(c.distance / 1000).toFixed(2)}km</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleFavoriteClick(cafeId) {
+      toggleFavorite(cafeId);
+      const btn = document.getElementById(`fav-btn-${cafeId}`);
+      if(btn) btn.innerHTML = isFavorite(cafeId) ? '⭐' : '☆';
+    };
+  </script>
+</body>
+</html>

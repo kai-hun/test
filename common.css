@@ -1,0 +1,18 @@
+body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #f9fafb; }
+header { background-color: #000000; color: white; text-align: center; padding: 1rem; font-size: 1.5rem; position: relative; }
+a.home-link { color: white; text-decoration: none; position: absolute; left: 1rem; top: 1.2rem; font-size: 1rem; }
+#result { margin-top: 1rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+.cafe { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; gap: 1.5rem; margin-bottom: 1rem; }
+.cafe-img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; }
+.cafe-info { flex-grow: 1; }
+.cafe-info h3 { margin: 0 0 0.5rem; }
+.cafe-features { font-size: 0.9rem; color: #555; margin: 0.5rem 0; }
+.favorite-btn { cursor: pointer; font-size: 1.5rem; float: right; }
+/* 기존 common.css 내용 아래에 추가 */
+.cafe-info h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+.cafe-info h3 a:hover {
+    text-decoration: underline;
+}

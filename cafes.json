@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "스타벅스 숭실대점",
+    "menus": [{"name": "아메리카노", "price": 4500}, {"name": "카페라떼", "price": 5000}, {"name": "바닐라 라떼", "price": 5500}],
+    "lat": 37.4967, "lng": 126.9575,
+    "theme": ["study", "group", "spacious"],
+    "features": ["넓은 공간", "카공 적합", "백색 소음", "콘센트 많음"],
+    "image": "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNTM3Mzh8MHwxfGFsbHx8fHx8fHx8fDE3MjAwNDEyODB8&ixlib=rb-4.0.3&q=80&w=400",
+    "operatingHours": "07:00-22:00"
+  },
+  {
+    "id": 2,
+    "name": "메가커피 숭실대점",
+    "menus": [{"name": "아메리카노", "price": 2000}, {"name": "카페라떼", "price": 2500}, {"name": "바닐라 라떼", "price": 3000}],
+    "lat": 37.4971, "lng": 126.9571,
+    "theme": ["takeout", "cheap"],
+    "features": ["가성비", "빠른 이용 가능", "테라스"],
+    "image": "https://images.unsplash.com/photo-1511920170033-f832d72d7d3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNTM3Mzh8MHwxfGFsbHx8fHx8fHx8fDE3MjAwNDE0MjR8&ixlib=rb-4.0.3&q=80&w=400",
+    "operatingHours": "08:00-22:00"
+  },
+  {
+    "id": 3,
+    "name": "투썸플레이스 숭실대점",
+    "menus": [{"name": "아메리카노", "price": 4800}, {"name": "카페라떼", "price": 5300}, {"name": "케이크", "price": 6500}],
+    "lat": 37.4965, "lng": 126.9582,
+    "theme": ["date", "dessert", "group"],
+    "features": ["디저트 맛있음", "넓은 좌석", "데이트 적합"],
+    "image": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNTM3Mzh8MHwxfGFsbHx8fHx8fHx8fDE3MjAwNDE0NDB8&ixlib=rb-4.0.3&q=80&w=400",
+    "operatingHours": "08:00-23:00"
+  },
+  {
+    "id": 4,
+    "name": "어나더카페",
+    "menus": [{"name": "아메리카노", "price": 4000}, {"name": "핸드드립", "price": 6000}],
+    "lat": 37.4950, "lng": 126.9560,
+    "theme": ["quiet", "study", "specialty"],
+    "features": ["조용한 분위기", "핸드드립 전문", "카공 적합"],
+    "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNTM3Mzh8MHwxfGFsbHx8fHx8fHx8fDE3MjAwNDE0NTd8&ixlib=rb-4.0.3&q=80&w=400",
+    "operatingHours": "10:00-21:00"
+  },
+  {
+    "id": 5,
+    "name": "커피나무 숭실대점",
+    "menus": [{"name": "아메리카노", "price": 3500}, {"name": "얼그레이 아인슈페너", "price": 5000}],
+    "lat": 37.4958, "lng": 126.9588,
+    "theme": ["study", "spacious", "dessert"],
+    "features": ["넓고 다양한 좌석", "카공 최적화", "콘센트 완비", "디저트 맛있음"],
+    "image": "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzNTM3Mzh8MHwxfGFsbHx8fHx8fHx8fDE3MjAwNDE0NzF8&ixlib=rb-4.0.3&q=80&w=400",
+    "operatingHours": "09:00-22:30"
+  }
+]

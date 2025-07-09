@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>테마별 카페 추천</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="common.css">
+  <style>
+    nav { display: flex; justify-content: center; align-items: center; gap: 1rem; padding: 1rem; background-color: #ecfdf5; flex-wrap: wrap; }
+    nav select, nav button { padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; font-size: 1rem; }
+    nav label { display: flex; align-items: center; gap: 0.3rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="home-link">처음으로</a>
+    테마별 추천
+  </header>
+  <nav>
+    <select id="themeSelect">
+      <option value="study">공부하기 좋은</option>
+      <option value="group">모임</option>
+      <option value="date">데이트</option>
+      <option value="dessert">디저트</option>
+      <option value="cheap">저렴한</option>
+    </select>
+    <label><input type="checkbox" id="openNowFilter" onchange="render()"> 영업 중인 곳만 보기</label>
+    <button onclick="render()">선택</button>
+  </nav>
+  
+  <main id="result"></main>
+
+  <script src="favorites.js"></script>
+  <script>
+    let cafeData = [];
+    
+    // 영업 중인지 확인하는 함수 (상세페이지와 중복되지만, 일단 여기에 둡니다)
+    const isCafeOpen = (operatingHours) => {
+        const now = new Date();
+        const currentTime = now.getHours() * 100 + now.getMinutes();
+        const [open, close] = operatingHours.split('-').map(time => {
+            const [h, m] = time.split(':');
+            return parseInt(h) * 100 + parseInt(m);
+        });
+        return currentTime >= open && currentTime < close;
+    };
+
+    const render = () => {
+      const themeValue = document.getElementById('themeSelect').value;
+      const openNowChecked = document.getElementById('openNowFilter').checked;
+      
+      let filtered = cafeData.filter(cafe => cafe.theme.includes(themeValue));
+
+      // ✨ [추가됨] 영업 중 필터 로직
+      if (openNowChecked) {
+          filtered = filtered.filter(cafe => isCafeOpen(cafe.operatingHours));
+      }
+
+      const resultDiv = document.getElementById('result');
+      if(filtered.length === 0){
+        resultDiv.innerHTML = '<p style="text-align:center; padding: 2rem;">조건에 맞는 카페가 없습니다.</p>';
+        return;
+      }
+      
+      resultDiv.innerHTML = filtered.map(cafe => `
+        <div class="cafe">
+          <img src="${cafe.image}" class="cafe-img" alt="${cafe.name}">
+          <div class="cafe-info">
+            <span class="favorite-btn" id="fav-btn-${cafe.id}" onclick="handleFavoriteClick(${cafe.id})">
+              ${isFavorite(cafe.id) ? '⭐' : '☆'}
+            </span>
+            <h3><a href="details.html?id=${cafe.id}">${cafe.name}</a></h3>
+            <div class="cafe-features">${cafe.features.join(' · ')}</div>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    const handleFavoriteClick = (cafeId) => {
+      toggleFavorite(cafeId);
+      const btn = document.getElementById(`fav-btn-${cafeId}`);
+      if(btn) btn.innerHTML = isFavorite(cafeId) ? '⭐' : '☆';
+    };
+
+    fetch('cafes.json')
+      .then(res => res.json())
+      .then(data => {
+        cafeData = data;
+        render();
+      });
+  </script>
+</body>
+</html>

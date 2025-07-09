@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>이상적인 카페 찾기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #f9fafb; text-align: center; }
+    .container { max-width: 600px; }
+    h1 { font-size: 2.5rem; color: #1f2937; }
+    .button-container { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 3rem; }
+    .button { display: block; padding: 1rem 2rem; font-size: 1.2rem; color: white; background-color: #000000; border-radius: 8px; text-decoration: none; transition: background-color 0.3s, transform 0.2s; }
+    .button:hover { background-color: #374151; transform: translateY(-3px); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>어떤 카페를 찾으시나요?</h1>
+    <div class="button-container">
+      <a href="map.html" class="button">1. 내 주변 카페 보기</a>
+      <a href="theme.html" class="button">2. 테마별로 추천받기</a>
+      <a href="price.html" class="button">3. 가격 순으로 정렬하기</a>
+      <a href="favorites.html" class="button" style="background-color: #010101;">4. 내가 찜한 카페</a>
+    </div>
+  </div>
+</body>
+</html>
