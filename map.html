@@ -24,13 +24,6 @@
     let userPosition;
     let openedInfoWindow = null;
 
-    fetch('cafes.json')
-      .then(res => res.json())
-      .then(data => {
-        cafeData = data.filter(c => c.lat && c.lng);
-        kakao.maps.load(initMap);
-      });
-
     function initMap() {
       navigator.geolocation.getCurrentPosition(pos => {
         userPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -54,8 +47,7 @@
           position: new kakao.maps.LatLng(cafe.lat, cafe.lng),
           title: cafe.name
         });
-        
-        // ✨ [수정됨] 정보창 내용에 상세 페이지로 가는 링크를 추가했습니다.
+
         const content = `
           <div style="padding:8px;font-size:13px; text-align:center;">
             <a href="details.html?id=${cafe.id}" style="text-decoration:none;color:black;">
@@ -65,24 +57,24 @@
             </a>
           </div>`;
         const infowindow = new kakao.maps.InfoWindow({ content: content, removable: true });
-        
+
         kakao.maps.event.addListener(marker, 'click', function () {
-            if (openedInfoWindow) {
-                openedInfoWindow.close();
-            }
-            infowindow.open(mapInstance, marker);
-            openedInfoWindow = infowindow;
+          if (openedInfoWindow) {
+            openedInfoWindow.close();
+          }
+          infowindow.open(mapInstance, marker);
+          openedInfoWindow = infowindow;
         });
       });
     }
-    
+
     function getDistance(lat1, lng1, lat2, lng2) {
       function toRad(v) { return v * Math.PI / 180; }
-      const R = 6371e3; // metres
+      const R = 6371e3;
       const φ1 = toRad(lat1), φ2 = toRad(lat2);
       const Δφ = toRad(lat2 - lat1), Δλ = toRad(lng2 - lng1);
-      const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2) * Math.sin(Δλ/2)**2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }
 
@@ -97,7 +89,7 @@
         <div class="cafe">
           <img src="${c.image}" class="cafe-img" alt="${c.name}">
           <div class="cafe-info">
-             <span class="favorite-btn" id="fav-btn-${c.id}" onclick="handleFavoriteClick(${c.id})">
+            <span class="favorite-btn" id="fav-btn-${c.id}" onclick="handleFavoriteClick(${c.id})">
               ${isFavorite(c.id) ? '⭐' : '☆'}
             </span>
             <h3><a href="details.html?id=${c.id}">${c.name}</a></h3>
@@ -110,8 +102,56 @@
     function handleFavoriteClick(cafeId) {
       toggleFavorite(cafeId);
       const btn = document.getElementById(`fav-btn-${cafeId}`);
-      if(btn) btn.innerHTML = isFavorite(cafeId) ? '⭐' : '☆';
-    };
+      if (btn) btn.innerHTML = isFavorite(cafeId) ? '⭐' : '☆';
+    }
+  </script>
+
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script>
+    const API_KEY = "AIzaSyAfcvgLaCPSbAw6xqVHGCFqPiKgXWUED7E";
+    const SHEET_ID = "1eOyqB03QmpaW_b7CFWH6emkeAdOWLx170-Jk7PhcTFM";
+    const SHEET_RANGE = "cafe_data!A1:Z100";
+
+    gapi.load('client', () => {
+      gapi.client.init({
+        apiKey: API_KEY,
+        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
+      }).then(() => {
+        gapi.client.sheets.spreadsheets.values.get({
+          spreadsheetId: SHEET_ID,
+          range: SHEET_RANGE,
+        }).then(res => {
+          const [header, ...rows] = res.result.values;
+          const themeCols = ["THEME_1", "THEME_2", "THEME_3"];
+          const featureCols = ["FEATURE_1", "FEATURE_2", "FEATURE_3", "FEATURE_4"];
+          const menuCols = header.slice(12);
+
+          cafeData = rows.map((row, idx) => {
+            const rowObj = Object.fromEntries(header.map((h, i) => [h, row[i]]));
+            return {
+              id: idx + 1,
+              name: rowObj.CAFE_NAME,
+              lat: parseFloat(rowObj.LAT),
+              lng: parseFloat(rowObj.LNG),
+              image: rowObj.IMAGE,
+              operatingHours: `${rowObj.OPEN}-${rowObj.CLOSE}`,
+              theme: themeCols.map(k => rowObj[k]).filter(Boolean),
+              features: featureCols.map(k => rowObj[k]).filter(Boolean),
+              menus: menuCols
+                .filter(k => rowObj[k])
+                .map(k => ({
+                  name: k,
+                  price: parseInt(rowObj[k].replace(/[₩,]/g, ""))
+                }))
+            };
+          }).filter(c => c.lat && c.lng);
+
+          if (typeof kakao !== "undefined" && kakao.maps && typeof initMap === "function") {
+            kakao.maps.load(initMap);
+          }
+        });
+      });
+    });
   </script>
 </body>
 </html>
