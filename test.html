@@ -5,6 +5,9 @@
 
   fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(RANGE)}?key=${API_KEY}`)
     .then(res => res.json())
-    .then(data => console.log("✅ 테스트 성공", data))
+    .then(data => {
+  console.log("✅ 테스트 성공", data);
+  alert(JSON.stringify(data, null, 2)); // 오류 메시지를 경고창으로 보여줌
+})
     .catch(err => console.error("❌ 테스트 실패", err));
 </script>
